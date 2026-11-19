@@ -214,6 +214,10 @@ export function createShows(scene) {
   watchRing(0, -7.1);
   shows.push(parade);
 
+  shows.push(buildStory(scene, makeDisc(0xe7d2ff), watchRing));
+  shows.push(buildPuppet(scene, makeDisc(0xd7e4ff), watchRing));
+  shows.push(buildMartial(scene, makeDisc(0xffc2b0), watchRing));
+
   const guests = buildGuests(scene);
 
   function addBody(p, r) {
@@ -225,9 +229,11 @@ export function createShows(scene) {
   }
   for (const p of guests) addBody(p, 0.34);
 
-  for (const p of [...plaza.cast, ...plaza.crowd, ...stage.cast, ...stage.crowd, ...street.cast, ...street.crowd, ...parade.cast, ...guests]) {
-    scene.add(p.root);
+  for (const show of shows) {
+    for (const p of show.cast) if (p.root.parent !== parade.float) scene.add(p.root);
+    for (const p of show.crowd) scene.add(p.root);
   }
+  for (const p of guests) scene.add(p.root);
   scene.add(parade.float);
 
   function update(time) {
@@ -338,6 +344,9 @@ function buildDialogue(scene, def) {
         def.disc.material.opacity = 0.28 + (ph.line.quiet ? 0 : 0.28);
       }
       if (def.kind === 'talk') show.look.set(def.x, 1.28, def.z);
+      else if (def.kind === 'puppet') show.look.set(def.x + 0.8, 1.45, def.z);
+      else if (def.kind === 'ring') show.look.set(def.x, 1.25, def.z);
+      else if (def.kind === 'booth') show.look.set(speaker.root.position.x, 1.35, speaker.root.position.z);
       else show.look.set(speaker.root.position.x, 1.45, speaker.root.position.z);
       if (def.after) def.after(time, ph);
     },
@@ -446,6 +455,167 @@ function buildParade(scene, disc) {
     },
   };
   return show;
+}
+
+const STORY_LINES = [
+  { who: 'shu', g: 'story', sec: 3.6, react: 'nod', zh: '从前园门一开，灯就自己亮了。', en: 'Once the gate opened, the lanterns lit themselves.' },
+  { who: 'shu', g: 'point', sec: 3.4, react: 'nod', zh: '不是火。是有人在等。', en: 'Not fire. Someone was waiting.' },
+  { who: 'shu', g: 'story', sec: 3.8, react: 'laugh', zh: '等的人后来去看花车，把故事留在凳子上。', en: 'The one who waited went to see the parade, and left the story on the bench.' },
+  { who: 'shu', g: 'bow', sec: 3.0, react: 'clap', zh: '你们坐着，我再讲一寸。', en: 'Stay seated. I will tell one more inch.' },
+];
+
+const PUPPET_LINES = [
+  { who: 'narr', g: 'talk', sec: 3.2, react: 'nod', zh: '灯一亮，影子就有了名字。', en: 'When the lamp comes up, a shadow gets a name.' },
+  { who: 'narr', g: 'point', sec: 3.0, react: 'laugh', zh: '左边是月亮，右边是着急。', en: 'On the left, the moon. On the right, a hurry.' },
+  { who: 'narr', g: 'talk', sec: 3.4, react: 'clap', zh: '它们打一架，其实是在鞠躬。', en: 'They fight, which is really a bow.' },
+  { who: 'narr', g: 'bow', sec: 2.8, react: 'clap', zh: '幕落。下一折还是这两位。', en: 'Curtain. The next fold is the same two.' },
+];
+
+const MARTIAL_LINES = [
+  { who: 'feng', g: 'strike', sec: 2.4, react: 'clap', zh: '看步，不看手。', en: 'Watch the step, not the hand.' },
+  { who: 'lin', g: 'guard', sec: 2.2, react: 'nod', zh: '手已经到了。', en: 'The hand is already here.' },
+  { who: 'feng', g: 'strike', sec: 2.6, react: 'clap', zh: '再慢一点，给后排。', en: 'Slower. The back row is still arriving.' },
+  { who: 'lin', g: 'bow', sec: 2.4, react: 'clap', zh: '这一式叫做让路。', en: 'This form is called making way.' },
+];
+
+function buildStory(scene, disc, watchRing) {
+  const teller = person({
+    id: 'shu', name: { zh: '说书人', en: 'Teller' }, color: 0x6a4a8a, skin: 0xf0c7a0, hair: 0x2a2118, hat: 0x3a2a22,
+    x: -18, z: 18.2, seed: 40, rot: 0, sit: true,
+  });
+  const bench = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.16, 0.4), new THREE.MeshLambertMaterial({ color: 0x7a4b2e }));
+  bench.position.set(-18, 0.2, 18.1);
+  scene.add(bench);
+  const listeners = [-1.15, 0, 1.15].map((dx, i) => person({
+    id: `sl${i}`, name: { zh: '听众', en: 'Listener' }, color: [0x8d5a6a, 0x4f6b4a, 0x5c4a78][i],
+    skin: i === 1 ? 0xd9a07a : 0xf0c7a0, x: -18 + dx, z: 15.4, seed: 41 + i, sit: true, rot: Math.PI,
+  }));
+  for (const x of [-19.2, -16.8]) {
+    const stool = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.16, 0.42), new THREE.MeshLambertMaterial({ color: 0x6b4226 }));
+    stool.position.set(x, 0.16, 15.5);
+    scene.add(stool);
+  }
+  watchRing(-18, 13.6);
+  return buildDialogue(scene, {
+    id: 'story',
+    kind: 'booth',
+    title: { zh: '说书', en: 'Story Booth' },
+    area: { zh: '西北棚', en: 'Northwest Shed' },
+    x: -18, z: 18.2,
+    stand: { x: -18, z: 13.6 },
+    radius: 4.4,
+    hear: 9,
+    cam: new THREE.Vector3(-15.1, 1.9, 14.6),
+    look: new THREE.Vector3(-18, 1.3, 17.6),
+    face: { x: -18, z: 13.6 },
+    lines: STORY_LINES,
+    cast: [teller],
+    crowd: listeners,
+    disc,
+  });
+}
+
+function buildPuppet(scene, disc, watchRing) {
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.4, 1.45),
+    new THREE.MeshLambertMaterial({ color: 0xf6e7c2, emissive: 0xd7b56a, emissiveIntensity: 0.45, side: THREE.DoubleSide }),
+  );
+  screen.position.set(-30.2, 1.55, -14);
+  screen.rotation.y = Math.PI / 2;
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.7, 2.7), new THREE.MeshLambertMaterial({ color: 0x5a3828 }));
+  frame.position.set(-30.35, 1.5, -14);
+  scene.add(frame, screen);
+  const puppets = [0x2a241c, 0x6a2430].map((color, i) => {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.55), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+    const head = new THREE.Mesh(new THREE.CircleGeometry(0.12, 8), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }));
+    head.position.y = 0.38;
+    g.add(body, head);
+    g.position.set(0, 0.15, 0.08);
+    screen.add(g);
+    return g;
+  });
+  const narr = person({
+    id: 'narr', name: { zh: '讲幕人', en: 'Narrator' }, color: 0x3d4f86, skin: 0xf3d2b5, hair: 0x241810,
+    x: -27.6, z: -14.8, seed: 50, rot: Math.PI / 2,
+  });
+  const ops = [0.7, -0.7].map((z, i) => person({
+    id: `op${i}`, name: { zh: '操偶', en: 'Operator' }, color: i ? 0x8d3a44 : 0x355e78, skin: 0xf0c7a0,
+    x: -31.3, z: -14 + z, seed: 51 + i, rot: Math.PI / 2,
+  }));
+  watchRing(-25.2, -14);
+  const show = buildDialogue(scene, {
+    id: 'puppet',
+    kind: 'puppet',
+    title: { zh: '皮影', en: 'Shadow Play' },
+    area: { zh: '西棚', en: 'West Shed' },
+    x: -30.2, z: -14,
+    stand: { x: -25.2, z: -14 },
+    radius: 5.2,
+    hear: 11,
+    cam: new THREE.Vector3(-24.4, 2.05, -12.1),
+    look: new THREE.Vector3(-29.4, 1.45, -14),
+    face: { x: -25, z: -14 },
+    lines: PUPPET_LINES,
+    cast: [narr, ...ops],
+    crowd: crowd(scene, -27.2, -14, 1.8, 3, 3.2, { arc: 1.2, face: Math.PI / 2 }),
+    disc,
+    after(time) {
+      puppets.forEach((puppet, i) => {
+        const a = time * 1.6 + i * 1.4;
+        puppet.position.x = (i === 0 ? -0.35 : 0.35) + Math.sin(a) * 0.18;
+        puppet.position.y = 0.15 + Math.abs(Math.sin(a * 2)) * 0.12;
+        puppet.rotation.z = Math.sin(a * 1.3) * 0.25;
+      });
+      for (const op of ops) {
+        posePerson(op, time, { gesture: 'wave', walk: 0, lookAt: { x: -30, y: 1.5, z: -14 } });
+        op.root.rotation.y = Math.PI / 2;
+      }
+    },
+  });
+  return show;
+}
+
+function buildMartial(scene, disc, watchRing) {
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(2.1, 2.45, 28),
+    new THREE.MeshBasicMaterial({ color: 0xe6c36a, side: THREE.DoubleSide }),
+  );
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(28, 0.05, -14);
+  const mat = new THREE.Mesh(
+    new THREE.CircleGeometry(2.05, 24),
+    new THREE.MeshLambertMaterial({ color: 0xd8c4a0 }),
+  );
+  mat.rotation.x = -Math.PI / 2;
+  mat.position.set(28, 0.04, -14);
+  scene.add(mat, ring);
+  const feng = person({
+    id: 'feng', name: { zh: '阿风', en: 'Feng' }, color: 0x9a3a2a, skin: 0xf0c7a0, hair: 0x1a120c,
+    x: 27.2, z: -14, seed: 60, rot: Math.PI / 2,
+  });
+  const lin = person({
+    id: 'lin', name: { zh: '阿林', en: 'Lin' }, color: 0xf2f0ea, skin: 0xd9a07a, hair: 0x3a3028,
+    x: 28.8, z: -14, seed: 61, rot: -Math.PI / 2,
+  });
+  watchRing(24.2, -11.2);
+  return buildDialogue(scene, {
+    id: 'martial',
+    kind: 'ring',
+    title: { zh: '把式', en: 'Martial Ring' },
+    area: { zh: '东南场', en: 'Southeast Ring' },
+    x: 28, z: -14,
+    stand: { x: 24.2, z: -11.2 },
+    radius: 6,
+    hear: 13,
+    cam: new THREE.Vector3(24.6, 3.4, -9.4),
+    look: new THREE.Vector3(28, 1.2, -14),
+    face: { x: 28, z: -14 },
+    lines: MARTIAL_LINES,
+    cast: [feng, lin],
+    crowd: crowd(scene, 28, -14, 3.3, 5, 4.4, { arc: Math.PI * 1.3, face: -0.4 }),
+    disc,
+  });
 }
 
 function buildGuests(scene) {

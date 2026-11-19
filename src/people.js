@@ -267,6 +267,18 @@ export function posePerson(person, time, pose = {}) {
     lE = -0.8; rE = -0.8; lZ = 0.25; rZ = -0.25;
   }
   if (g === 'listen') { lX = 0.22; rX = 0.05; lZ = 0.18; rZ = -0.12; }
+  if (g === 'story') {
+    j.chest.rotation.x = 0.2 + Math.sin(time * 2.2 + seed) * 0.04;
+    rX = -1.15 + s * 0.22;
+    rE = -0.45;
+    lX = -0.35;
+  }
+  if (g === 'guard') { lX = -1.2; rX = -1.2; lE = -1.1; rE = -1.1; lZ = 0.45; rZ = -0.45; }
+  if (g === 'strike') {
+    lX = -0.4; rX = -1.7; rE = -0.3; rZ = -0.2;
+    j.hipR.rotation.x = -1.35;
+    j.kneeR.rotation.x = 0.4;
+  }
   if (g === 'walk') { /* already applied */ }
   j.shoulderL.rotation.set(lX, 0, lZ);
   j.shoulderR.rotation.set(rX, 0, rZ);
@@ -287,7 +299,9 @@ export function posePerson(person, time, pose = {}) {
   const look = lookAngles(person, pose.lookAt || null);
   let nod = 0;
   if (pose.nod) nod = Math.sin(time * 4.2 + seed) * 0.12;
-  j.head.rotation.set(look.pitch + nod + (g === 'bow' ? 0.35 : 0), look.yaw, Math.sin(time * 0.6 + seed) * 0.03);
+  const bob = pose.speak ? Math.sin(time * 9.5 + seed) * 0.055 : 0;
+  const sway = pose.speak ? Math.sin(time * 3.1 + seed) * 0.07 : 0;
+  j.head.rotation.set(look.pitch + nod + bob + (g === 'bow' ? 0.35 : 0), look.yaw + sway, Math.sin(time * 0.6 + seed) * 0.03);
 
   const focus = pose.focus ? 1.12 : 1;
   const s0 = person.base * focus;

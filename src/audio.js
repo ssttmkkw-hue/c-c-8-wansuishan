@@ -7,6 +7,9 @@ export function createAudio() {
   let lastDrum = -999;
   let lastFlute = -999;
   let lastTick = -999;
+  let lastPluck = -999;
+  let lastBlock = -999;
+  let lastHit = -999;
 
   function ensure() {
     if (ctx) return;
@@ -83,6 +86,34 @@ export function createAudio() {
           const notes = [494, 587, 659, 587, 523, 440];
           const close = watching === 'stage' ? 1 : Math.max(0, 1 - stage / 16);
           blip(notes[Math.abs(phrase) % notes.length], 0.28, close * 0.035, 'triangle');
+        }
+      }
+      const story = dist.story ?? 99;
+      if (watching === 'story' || story < 11) {
+        const phrase = Math.floor(time / 2.8);
+        if (phrase !== lastPluck) {
+          lastPluck = phrase;
+          const notes = [392, 440, 494, 392, 330];
+          const close = watching === 'story' ? 1 : Math.max(0, 1 - story / 11);
+          blip(notes[Math.abs(phrase) % notes.length], 0.22, close * 0.03, 'triangle');
+        }
+      }
+      const puppet = dist.puppet ?? 99;
+      if (watching === 'puppet' || puppet < 12) {
+        const beat = Math.floor(time * 2.4);
+        if (beat !== lastBlock) {
+          lastBlock = beat;
+          const close = watching === 'puppet' ? 1 : Math.max(0, 1 - puppet / 12);
+          blip(180 + (beat % 3) * 30, 0.04, close * 0.03, 'square');
+        }
+      }
+      const martial = dist.martial ?? 99;
+      if (watching === 'martial' || martial < 14) {
+        const beat = Math.floor(time * 1.6);
+        if (beat !== lastHit && beat % 2 === 0) {
+          lastHit = beat;
+          const close = watching === 'martial' ? 1 : Math.max(0, 1 - martial / 14);
+          blip(96, 0.09, close * 0.05, 'square');
         }
       }
       const street = dist.street ?? 99;

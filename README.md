@@ -38,7 +38,7 @@ The UI defaults to Chinese. Switch with the corner button or `L`. The choice is 
 | 转向 | 按住鼠标拖动，或 `Q` / `R` |
 | 观看 | 站进金色圈子，按 `E`。镜头会缓到看席 |
 | 离开 | `E` 或 `Esc` |
-| 节目单 | 点「前往」，或数字键 `1`–`4`。`M` 收起 |
+| 节目单 | 点「前往」，或数字键 `1`–`7`。`M` 收起 |
 | 帮助 | `H`，或第一次进入时的卡片。`Esc` 关掉 |
 | 静音 | 顶栏按钮。自动化测试可调用 `__wansui.setMuted(true)` |
 
@@ -53,9 +53,12 @@ Walking close already shows the acting and a quieter mix. `E` eases into a desig
 Four shows loop on one shared clock, even when the player is elsewhere.
 
 1. **广场闲谈 / Plaza Talk** — 西广场四人对话，一次只一个人说话。观众会点头、笑、鼓掌。
-2. **灯与月 / Lamp and Moon** — 戏台双人短剧，关节人偶，座位上有观众。观看镜头在看席一侧。
-3. **路边杂耍 / Street Juggler** — 东市抛球，地上有帽子，围观的人跟着拍。
-4. **花车巡游 / Lantern Parade** — 北路椭圆巡回，鼓手、旗、花旦和一辆花车。观看时镜头跟着队伍，保持宽一点。
+2. **灯与月 / Lamp and Moon** — 戏台双人短剧，关节人偶，座位上有观众。观看镜头在看席前方。
+3. **路边杂耍 / Street Juggler** — 东市抛球，地上有帽子，围观的人跟着拍。镜头更近。
+4. **花车巡游 / Lantern Parade** — 北路椭圆巡回，鼓手、旗、花旦和一辆花车。观看时是偏高的宽镜头，跟着队伍。
+5. **说书 / Story Booth** — 西北棚，说书人坐在凳上，听众挨着坐。镜头贴近。
+6. **皮影 / Shadow Play** — 西棚幕布上两个人影，讲幕人在前面说。
+7. **把式 / Martial Ring** — 东南场两人过招，圈子外有人看。镜头把整个场子框进来。
 
 园门旁有一块立体节目单（画布文字，使用已安装的 Noto Sans CJK），HUD 里有同一份列表和小地图。点列表或小地图可以过去。
 
@@ -90,9 +93,9 @@ Lines are original. There is no excerpted play text and no recorded audio.
 
 ## Status / 状态
 
-第一轮可玩：能走、能看、有地图和节目单。第二轮会加更多演出和观众，第三轮再做手机和性能。说明见 `docs/ROUND_1.md`。
+七场演出都在循环，观众会看、会鼓掌。手机操作和进一步的性能还在后面。说明见 `docs/ROUND_1.md` 和 `docs/ROUND_2.md`。
 
-Round 1 is playable: walk, watch, map, schedule. Later rounds add more shows, then phone controls and a performance pass. See `docs/ROUND_1.md`.
+Seven shows loop, with crowds that look and clap. Phone controls and a deeper performance pass come next. See `docs/ROUND_1.md` and `docs/ROUND_2.md`.
 
 ## License / 许可
 

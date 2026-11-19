@@ -67,7 +67,7 @@ const labelObjs = [];
 const tmp4 = new THREE.Vector4();
 
 const playerRadius = 0.42;
-const ORDER = ['plaza', 'stage', 'street', 'parade'];
+const ORDER = ['plaza', 'stage', 'street', 'parade', 'story', 'puppet', 'martial'];
 
 function showById(id) {
   return showsApi.shows.find((show) => show.id === id) || null;
@@ -389,7 +389,7 @@ function drawMap() {
   ctx.beginPath();
   ctx.ellipse(toX(0), toY(-16), (14 / 72) * w, (6 / 64) * h, 0, 0, Math.PI * 2);
   ctx.stroke();
-  const colors = { plaza: '#c4564a', stage: '#8d3a44', street: '#d3542c', parade: '#c4893a' };
+  const colors = { plaza: '#c4564a', stage: '#8d3a44', street: '#d3542c', parade: '#c4893a', story: '#6a4a8a', puppet: '#3d4f86', martial: '#9a3a2a' };
   for (const show of showsApi.shows) {
     ctx.fillStyle = colors[show.id] || '#333';
     ctx.beginPath();

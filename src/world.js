@@ -309,18 +309,25 @@ function createBoard(scene, colliders) {
     fit(ctx, heading, 64, 48, 900, 72, '700');
     ctx.fillStyle = '#8a5a3a';
     fit(ctx, sub, 64, 140, 900, 36, '500');
+    const count = Math.max(1, rows.length);
+    const top = 190;
+    const bottom = 1240;
+    const gap = 8;
+    const rowH = (bottom - top - gap * (count - 1)) / count;
+    const titlePx = rowH > 150 ? 40 : 28;
+    const nowPx = rowH > 150 ? 30 : 22;
     rows.forEach((row, i) => {
-      const y = 230 + i * 250;
+      const y = top + i * (rowH + gap);
       ctx.fillStyle = '#efe2cb';
-      ctx.fillRect(56, y, 920, 220);
+      ctx.fillRect(56, y, 920, rowH);
       ctx.fillStyle = row.accent || '#9a2e32';
-      ctx.fillRect(56, y, 16, 220);
+      ctx.fillRect(56, y, 14, rowH);
       ctx.fillStyle = '#3a241c';
-      fit(ctx, row.title, 96, y + 18, 860, 48, '700');
+      fit(ctx, row.title, 88, y + 8, 860, titlePx, '700');
       ctx.fillStyle = '#6b221f';
-      fit(ctx, row.now, 96, y + 84, 860, 36, '600');
+      fit(ctx, row.now, 88, y + rowH * 0.38, 860, nowPx, '600');
       ctx.fillStyle = '#6d5a48';
-      fit(ctx, row.next, 96, y + 146, 860, 30, '500');
+      fit(ctx, row.next, 88, y + rowH * 0.68, 860, Math.max(18, nowPx - 4), '500');
     });
     tex.needsUpdate = true;
   }
