@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>万岁山 · Wansuishan</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%238d2a30'/%3E%3Crect x='6' y='18' width='4' height='10' fill='%23e6c36a'/%3E%3Crect x='22' y='18' width='4' height='10' fill='%23e6c36a'/%3E%3Cpath d='M4 18h24l-3-6H7z' fill='%23c4564a'/%3E%3Ccircle cx='16' cy='10' r='3' fill='%23ffb347'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="hud">
+    <header id="top">
+      <div id="brand">
+        <strong data-i18n="title">万岁山</strong>
+        <span data-i18n="tag">走到哪，看到哪</span>
+      </div>
+      <div id="where">园门</div>
+      <div id="top-actions">
+        <button type="button" id="btn-lang">EN</button>
+        <button type="button" id="btn-mute" data-i18n="muteOff">静音</button>
+        <label id="quality-label"><span data-i18n="quality">画质</span>
+          <select id="quality">
+            <option value="auto" data-i18n="qAuto">自动</option>
+            <option value="low" data-i18n="qLow">低</option>
+            <option value="high" data-i18n="qHigh">高</option>
+          </select>
+        </label>
+        <button type="button" id="btn-help" data-i18n="help">帮助</button>
+      </div>
+    </header>
+    <aside id="schedule">
+      <div class="sched-head">
+        <h2 data-i18n="schedule">节目单</h2>
+        <button type="button" id="btn-fold" data-i18n="closeSchedule">收起</button>
+      </div>
+      <ul id="schedule-list"></ul>
+    </aside>
+    <canvas id="minimap" width="180" height="180" aria-label="minimap"></canvas>
+    <div id="prompt" hidden></div>
+    <div id="subtitle" hidden>
+      <div id="sub-who"></div>
+      <div id="sub-main"></div>
+      <div id="sub-alt"></div>
+    </div>
+  </div>
+  <div id="touch" hidden>
+    <div id="stick" aria-hidden="true"><div id="knob"></div></div>
+    <button type="button" id="btn-watch">观看</button>
+  </div>
+  <div id="help" hidden>
+    <div id="help-card" role="dialog" aria-modal="true">
+      <h2 data-i18n="helpTitle">欢迎来到万岁山</h2>
+      <p data-i18n="helpP1"></p>
+      <p data-i18n="helpP2"></p>
+      <p data-i18n="helpP3"></p>
+      <p data-i18n="helpP4"></p>
+      <p class="note" data-i18n="affiliation"></p>
+      <button type="button" id="help-dismiss" data-i18n="dismiss">开始逛园</button>
+    </div>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
