@@ -158,12 +158,75 @@ button:hover { background: #fff4df; }
   padding: 8px 16px;
 }
 
-#touch { display: none; }
+#touch { display: none; position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+body.touch #touch { display: block; }
+#stick {
+  pointer-events: auto;
+  position: absolute;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: rgba(255, 248, 238, 0.42);
+  border: 2px solid rgba(141, 42, 48, 0.35);
+  touch-action: none;
+}
+#knob {
+  position: absolute;
+  left: 36px;
+  top: 36px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(141, 42, 48, 0.78);
+}
+#btn-watch {
+  pointer-events: auto;
+  position: absolute;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(132px, calc(env(safe-area-inset-bottom) + 124px));
+  background: #8d2a30;
+  color: #fff8ee;
+  border: none;
+  min-width: 84px;
+  min-height: 44px;
+  font-size: 16px;
+}
 [hidden] { display: none !important; }
 
-@media (max-width: 720px) {
-  #top { flex-wrap: wrap; }
-  #schedule { max-height: 32vh; }
-  #subtitle { width: calc(100vw - 24px); bottom: 12px; }
-  #minimap { width: 120px; height: 120px; }
+body.touch #schedule {
+  top: 62px;
+  width: min(230px, 46vw);
+  max-height: 28vh;
+  padding: 8px;
+}
+body.touch #minimap {
+  width: 92px;
+  height: 92px;
+  right: max(10px, env(safe-area-inset-right));
+  bottom: max(12px, env(safe-area-inset-bottom));
+}
+body.touch #subtitle {
+  width: min(520px, calc(100vw - 28px));
+  bottom: 108px;
+}
+body.touch #sub-main { font-size: 18px; }
+body.touch #prompt { bottom: 168px; }
+body.touch #top { margin: 6px; padding: 6px 8px; gap: 8px; }
+body.touch #brand span, body.touch #quality-label { display: none; }
+body.touch #top-actions button { padding: 5px 8px; font-size: 13px; }
+@media (max-width: 520px) {
+  body.touch #where { display: none; }
+  body.touch #top { gap: 6px; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  body.touch #schedule { max-height: 42vh; width: min(200px, 34vw); }
+  body.touch #subtitle { bottom: 12px; }
+  body.touch #prompt { bottom: 64px; }
+  body.touch #btn-watch { bottom: 16px; right: 116px; }
+  body.touch #minimap { width: 72px; height: 72px; }
+  #stick { width: 96px; height: 96px; }
+  #knob { left: 28px; top: 28px; }
 }

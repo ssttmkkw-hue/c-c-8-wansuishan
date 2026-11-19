@@ -36,8 +36,9 @@ The UI defaults to Chinese. Switch with the corner button or `L`. The choice is 
 | --- | --- |
 | 移动 | `WASD` 或方向键，`Shift` 跑步 |
 | 转向 | 按住鼠标拖动，或 `Q` / `R` |
-| 观看 | 站进金色圈子，按 `E`。镜头会缓到看席 |
-| 离开 | `E` 或 `Esc` |
+| 观看 | 站进金色圈子，按 `E`，或手机上点「观看」 |
+| 离开 | `E`、`Esc`，或再点「离开」 |
+| 手机 | 左下摇杆移动，在画面上拖动转向 |
 | 节目单 | 点「前往」，或数字键 `1`–`7`。`M` 收起 |
 | 帮助 | `H`，或第一次进入时的卡片。`Esc` 关掉 |
 | 静音 | 顶栏按钮。自动化测试可调用 `__wansui.setMuted(true)` |
@@ -93,9 +94,9 @@ Lines are original. There is no excerpted play text and no recorded audio.
 
 ## Status / 状态
 
-七场演出都在循环，观众会看、会鼓掌。手机操作和进一步的性能还在后面。说明见 `docs/ROUND_1.md` 和 `docs/ROUND_2.md`。
+七场演出都在循环。桌面用键鼠，手机用摇杆和「观看」按钮。说明见 `docs/ROUND_1.md`、`docs/ROUND_2.md`、`docs/ROUND_3.md`。
 
-Seven shows loop, with crowds that look and clap. Phone controls and a deeper performance pass come next. See `docs/ROUND_1.md` and `docs/ROUND_2.md`.
+Seven shows loop. Desktop uses the keyboard and mouse. A phone uses the stick and the Watch button. See `docs/ROUND_1.md`, `docs/ROUND_2.md`, and `docs/ROUND_3.md`.
 
 ## License / 许可
 

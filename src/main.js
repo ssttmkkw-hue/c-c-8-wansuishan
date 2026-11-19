@@ -1,13 +1,29 @@
 import * as THREE from 'three';
-import { createKeyboard, createPointer } from './input.js';
+import { createKeyboard, createPointer, createTouch } from './input.js';
 import { createAudio } from './audio.js';
 import { applyDom, getLang, onLang, setLang, t, toggleLang } from './i18n.js';
 import { createPerson, posePerson, setPeopleShadows } from './people.js';
 import { createShows } from './shows.js';
 import { blocked, buildWorld, pullCamera } from './world.js';
 
+function detectSoftwareEarly() {
+  try {
+    const probe = document.createElement('canvas');
+    const gl = probe.getContext('webgl');
+    if (!gl) return true;
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : '';
+    const lose = gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+    return /swiftshader|llvmpipe|softpipe|software/i.test(String(name));
+  } catch {
+    return false;
+  }
+}
+
 const canvas = document.querySelector('#view');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const softwareGuess = detectSoftwareEarly();
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !softwareGuess, powerPreference: 'high-performance' });
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -52,6 +68,7 @@ scene.add(spot.target);
 
 const keyboard = createKeyboard();
 const pointer = createPointer(canvas);
+const touch = createTouch(document.querySelector('#stick'), document.querySelector('#knob'));
 const clock = new THREE.Clock();
 
 let sim = 0;
@@ -180,6 +197,8 @@ function movePlayer(dt) {
   }
   let ix = 0;
   let iz = 0;
+  ix += touch.vector.x;
+  iz += touch.vector.y;
   if (keyboard.heldAny('KeyA', 'ArrowLeft')) ix -= 1;
   if (keyboard.heldAny('KeyD', 'ArrowRight')) ix += 1;
   if (keyboard.heldAny('KeyW', 'ArrowUp')) iz -= 1;
@@ -215,7 +234,10 @@ function movePlayer(dt) {
 
 function present() {
   world.update(sim);
-  showsApi.update(sim);
+  const pp = player.root.position;
+  showsApi.update(sim, pp.x, pp.z, watching);
+  const watchBtn = document.querySelector('#btn-watch');
+  if (watchBtn) watchBtn.textContent = watching ? t('leaveShort') : t('watchShort');
   const active = watching ? showById(watching) : (nearestShow(16)?.show || showsApi.shows[0]);
   if (active) {
     spot.position.set(active.speakerPos.x + 0.4, 4.4, active.speakerPos.z + 1.1);
@@ -390,11 +412,18 @@ function drawMap() {
   ctx.ellipse(toX(0), toY(-16), (14 / 72) * w, (6 / 64) * h, 0, 0, Math.PI * 2);
   ctx.stroke();
   const colors = { plaza: '#c4564a', stage: '#8d3a44', street: '#d3542c', parade: '#c4893a', story: '#6a4a8a', puppet: '#3d4f86', martial: '#9a3a2a' };
+  const popular = nearestShow(30);
   for (const show of showsApi.shows) {
+    const hot = show.id === watching || (popular && popular.show === show);
     ctx.fillStyle = colors[show.id] || '#333';
     ctx.beginPath();
-    ctx.arc(toX(show.x), toY(show.z), show.id === watching ? 6 : 4.5, 0, Math.PI * 2);
+    ctx.arc(toX(show.x), toY(show.z), hot ? 6.5 : 4, 0, Math.PI * 2);
     ctx.fill();
+    if (hot) {
+      ctx.strokeStyle = '#e6c36a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
   }
   const p = player.root.position;
   ctx.save();
@@ -431,6 +460,15 @@ function bindUi() {
   document.querySelector('#help-dismiss').addEventListener('click', () => closeHelp());
   document.querySelector('#btn-fold').addEventListener('click', () => {
     document.querySelector('#schedule').classList.toggle('collapsed');
+  });
+  document.querySelector('#btn-watch').addEventListener('click', () => {
+    if (helpLock) return;
+    if (watching) {
+      leaveWatch(false);
+      return;
+    }
+    const near = nearestShow(18);
+    if (near) enterWatch(near.show.id, false);
   });
   document.querySelector('#quality').addEventListener('change', (event) => {
     quality = event.target.value;

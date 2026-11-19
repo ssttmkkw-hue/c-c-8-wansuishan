@@ -72,11 +72,15 @@ export function createPointer(dom) {
   let dx = 0;
   let dy = 0;
   let wheel = 0;
+  let lastX = 0;
+  let lastY = 0;
 
   dom.addEventListener('pointerdown', (event) => {
-    if (event.button !== 0) return;
+    if (event.button !== 0 && event.pointerType !== 'touch') return;
     if (event.target !== dom) return;
     dragging = true;
+    lastX = event.clientX;
+    lastY = event.clientY;
     dom.setPointerCapture(event.pointerId);
   });
   const end = () => { dragging = false; };
@@ -84,8 +88,12 @@ export function createPointer(dom) {
   dom.addEventListener('pointercancel', end);
   dom.addEventListener('pointermove', (event) => {
     if (!dragging) return;
-    dx += event.movementX;
-    dy += event.movementY;
+    const mx = event.movementX || (event.clientX - lastX);
+    const my = event.movementY || (event.clientY - lastY);
+    lastX = event.clientX;
+    lastY = event.clientY;
+    dx += mx;
+    dy += my;
   });
   dom.addEventListener('wheel', (event) => {
     event.preventDefault();
@@ -102,4 +110,60 @@ export function createPointer(dom) {
       return out;
     },
   };
+}
+
+/** Left stick, same idea as the English-sim touch control. */
+export function createTouch(stick, knob) {
+  const vector = { x: 0, y: 0 };
+  let active = null;
+  const base = { x: 0, y: 0 };
+
+  function place(x, y) {
+    knob.style.transform = `translate(${x}px, ${y}px)`;
+  }
+  stick.addEventListener('pointerdown', (event) => {
+    active = event.pointerId;
+    stick.setPointerCapture(event.pointerId);
+    const rect = stick.getBoundingClientRect();
+    base.x = rect.left + rect.width / 2;
+    base.y = rect.top + rect.height / 2;
+    move(event);
+  });
+  stick.addEventListener('pointermove', (event) => {
+    if (event.pointerId !== active) return;
+    move(event);
+  });
+  const end = (event) => {
+    if (event.pointerId !== active) return;
+    active = null;
+    vector.x = 0;
+    vector.y = 0;
+    place(0, 0);
+  };
+  stick.addEventListener('pointerup', end);
+  stick.addEventListener('pointercancel', end);
+
+  function move(event) {
+    let mx = event.clientX - base.x;
+    let my = event.clientY - base.y;
+    const max = 46;
+    const len = Math.hypot(mx, my) || 1;
+    if (len > max) {
+      mx = (mx / len) * max;
+      my = (my / len) * max;
+    }
+    place(mx, my);
+    vector.x = mx / max;
+    vector.y = my / max;
+  }
+
+  const narrow = () => window.innerWidth < 900 || window.innerWidth < window.innerHeight;
+  const coarse = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+  function sync() {
+    document.body.classList.toggle('touch', coarse || narrow());
+  }
+  sync();
+  window.addEventListener('resize', sync);
+
+  return { vector, sync };
 }

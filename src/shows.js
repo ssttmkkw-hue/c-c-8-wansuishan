@@ -236,8 +236,14 @@ export function createShows(scene) {
   for (const p of guests) scene.add(p.root);
   scene.add(parade.float);
 
-  function update(time) {
-    for (const show of shows) show.update(time);
+  function update(time, px = 0, pz = 0, watchingId = null) {
+    for (const show of shows) {
+      const dist = Math.hypot(show.x - px, show.z - pz);
+      const focus = watchingId === show.id;
+      for (const p of show.crowd) p.root.visible = focus || dist < 32;
+      if (show.float) show.float.visible = focus || dist < 48;
+      show.update(time);
+    }
     updateGuests(guests, time, shows);
     for (let i = 0; i < bodies.length; i += 1) {
       const b = bodies[i];
@@ -517,13 +523,13 @@ function buildStory(scene, disc, watchRing) {
 
 function buildPuppet(scene, disc, watchRing) {
   const screen = new THREE.Mesh(
-    new THREE.PlaneGeometry(2.4, 1.45),
+    new THREE.PlaneGeometry(2.4, 2.15),
     new THREE.MeshLambertMaterial({ color: 0xf6e7c2, emissive: 0xd7b56a, emissiveIntensity: 0.45, side: THREE.DoubleSide }),
   );
-  screen.position.set(-30.2, 1.55, -14);
+  screen.position.set(-30.2, 1.25, -14);
   screen.rotation.y = Math.PI / 2;
-  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 1.7, 2.7), new THREE.MeshLambertMaterial({ color: 0x5a3828 }));
-  frame.position.set(-30.35, 1.5, -14);
+  const frame = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.3, 2.7), new THREE.MeshLambertMaterial({ color: 0x5a3828 }));
+  frame.position.set(-30.35, 1.25, -14);
   scene.add(frame, screen);
   const puppets = [0x2a241c, 0x6a2430].map((color, i) => {
     const g = new THREE.Group();

@@ -143,6 +143,7 @@ export function buildWorld() {
   flowerSpots.forEach(([x, z], i) => {
     const mesh = new THREE.Mesh(flowerGeo, flowerCols[i % flowerCols.length]);
     mesh.position.set(x, 0.12, z);
+    mesh.userData.live = true;
     scene.add(mesh);
     flowers.push(mesh);
   });
@@ -150,11 +151,13 @@ export function buildWorld() {
   const kois = [0, 1, 2].map((i) => {
     const mesh = new THREE.Mesh(boxGeo, new THREE.MeshLambertMaterial({ color: i === 2 ? 0xf2f2f2 : 0xe07a3a }));
     mesh.scale.set(0.28, 0.08, 0.12);
+    mesh.userData.live = true;
     scene.add(mesh);
     return { mesh, phase: i * 2.1, speed: 0.35 + i * 0.05 };
   });
 
   const board = createBoard(scene, colliders);
+  mergeStatic(scene);
 
   return {
     scene,
@@ -273,6 +276,7 @@ function addTree(scene, colliders, x, z, scale, kind) {
   }
   group.position.set(x, 0, z);
   group.scale.setScalar(scale);
+  group.userData.live = true;
   scene.add(group);
   const r = 0.28 * scale;
   colliders.push({ minX: x - r, maxX: x + r, minZ: z - r, maxZ: z + r, h: 2 });
@@ -334,6 +338,76 @@ function createBoard(scene, colliders) {
 
   paint('节目单', '…', []);
   return { paint };
+}
+
+function isLive(obj) {
+  let node = obj;
+  while (node) {
+    if (node.userData && node.userData.live) return true;
+    node = node.parent;
+  }
+  return false;
+}
+
+function bakeGeometry(mesh) {
+  const source = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry;
+  const geometry = source.clone();
+  geometry.applyMatrix4(mesh.matrixWorld);
+  return geometry;
+}
+
+function mergeGeometries(geos) {
+  let count = 0;
+  for (const geometry of geos) count += geometry.getAttribute('position').count;
+  const position = new Float32Array(count * 3);
+  const normal = new Float32Array(count * 3);
+  let offset = 0;
+  for (const geometry of geos) {
+    const p = geometry.getAttribute('position');
+    const n = geometry.getAttribute('normal');
+    for (let i = 0; i < p.count; i += 1) {
+      position[offset] = p.getX(i);
+      position[offset + 1] = p.getY(i);
+      position[offset + 2] = p.getZ(i);
+      if (n) {
+        normal[offset] = n.getX(i);
+        normal[offset + 1] = n.getY(i);
+        normal[offset + 2] = n.getZ(i);
+      }
+      offset += 3;
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(position, 3));
+  geometry.setAttribute('normal', new THREE.BufferAttribute(normal, 3));
+  return geometry;
+}
+
+function mergeStatic(scene) {
+  scene.updateMatrixWorld(true);
+  const groups = new Map();
+  scene.traverse((obj) => {
+    if (!obj.isMesh || isLive(obj)) return;
+    const material = obj.material;
+    if (!material || material.transparent || Array.isArray(material)) return;
+    const list = groups.get(material);
+    if (list) list.push(obj);
+    else groups.set(material, [obj]);
+  });
+  const remove = [];
+  for (const [material, meshes] of groups) {
+    if (meshes.length < 2) continue;
+    const geos = meshes.map((mesh) => bakeGeometry(mesh));
+    const merged = new THREE.Mesh(mergeGeometries(geos), material);
+    merged.castShadow = false;
+    merged.receiveShadow = true;
+    merged.matrixAutoUpdate = false;
+    scene.add(merged);
+    remove.push(...meshes);
+  }
+  for (const mesh of remove) {
+    if (mesh.parent) mesh.parent.remove(mesh);
+  }
 }
 
 function fit(ctx, text, x, y, maxW, px, weight) {
